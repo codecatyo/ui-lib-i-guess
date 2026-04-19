@@ -21,7 +21,7 @@ local visible = true
 local usable = true
 
 if _G.HideKeybind == nil then
-    _G.HideKeybind = Enum.KeyCode.RightControl
+    _G.HideKeybind = Enum.KeyCode.RightShift
 end
 
 UIS.InputBegan:Connect(function(key)
