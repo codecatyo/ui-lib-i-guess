@@ -1120,6 +1120,13 @@ function Lib:CreateWindow(name)
         updateSize(25)
     end
 
+    function Window:String(text)
+        if type(text) == "table" and text.string then
+            text = text.string
+        end
+        return Window:Label(text)
+    end
+
     return Window
 end
 
