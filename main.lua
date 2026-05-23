@@ -1,9 +1,11 @@
 -- cred to rty i guess, dc of him: rty_lol
+-- Modified by CATTSTAR
 
 local Lib = {}
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 
 local ASSET_ID = "rbxassetid://6850537969"
 local GLOW_ASSET_ID = "rbxassetid://4905552912"
@@ -27,33 +29,11 @@ end
 UIS.InputBegan:Connect(function(key)
     if key.KeyCode == _G.HideKeybind and usable then
         usable = false
+        visible = not visible
         for _, v in pairs(ScreenGui:GetChildren()) do
-            task.spawn(function()
-                if visible then
-                    v:TweenPosition(
-                        UDim2.new(0, v.AbsolutePosition.X, 0, v.AbsolutePosition.Y - 500),
-                        Enum.EasingDirection.In,
-                        Enum.EasingStyle.Sine,
-                        0.5,
-                        true
-                    )
-                    task.wait(0.5)
-                    v.Visible = false
-                else
-                    v.Visible = true
-                    v:TweenPosition(
-                        UDim2.new(0, v.AbsolutePosition.X, 0, v.AbsolutePosition.Y + 500),
-                        Enum.EasingDirection.In,
-                        Enum.EasingStyle.Sine,
-                        0.5,
-                        true
-                    )
-                end
-            end)
-            task.wait(0.05)
+            v.Visible = visible
         end
         usable = true
-        visible = not visible
     end
 end)
 
@@ -245,7 +225,7 @@ function Lib:CreateWindow(name)
 
     addDrag(TitleText, Main)
 
-    -- ============= window =============
+    Window.ToggleButtons = {}
 
     function Window:Button(name, callback)
         callback = callback or function() end
@@ -366,6 +346,14 @@ function Lib:CreateWindow(name)
         Text.TextStrokeTransparency = 0.92
         Text.TextXAlignment = Enum.TextXAlignment.Left
 
+        local toggleInfo = {
+            button = ToggleButton,
+            location = location,
+            flag = flag,
+            callback = callback
+        }
+        table.insert(Window.ToggleButtons, toggleInfo)
+
         Text.MouseButton1Click:Connect(function()
             if ToggleButton.Text == "On" then
                 ToggleButton.Text = "Off"
@@ -382,6 +370,28 @@ function Lib:CreateWindow(name)
         end)
         
         updateSize(25)
+        
+        return ToggleButton
+    end
+
+    function Window:SetToggleState(flag, state)
+        for _, toggle in pairs(Window.ToggleButtons) do
+            if toggle.flag == flag then
+                if state then
+                    toggle.button.Text = "On"
+                    toggle.button.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    toggle.button.TextStrokeColor3 = Color3.fromRGB(0, 255, 0)
+                    toggle.location[toggle.flag] = true
+                else
+                    toggle.button.Text = "Off"
+                    toggle.button.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    toggle.button.TextStrokeColor3 = Color3.fromRGB(255, 0, 0)
+                    toggle.location[toggle.flag] = false
+                end
+                return true
+            end
+        end
+        return false
     end
 
     function Window:Slider(name, options, callback)
