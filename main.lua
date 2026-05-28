@@ -226,6 +226,9 @@ function Lib:CreateWindow(name)
     addDrag(TitleText, Main)
 
     Window.ToggleButtons = {}
+    Window.ToggleElements = {}
+    
+    Window._toggleCallbacks = {}
 
     function Window:Button(name, callback)
         callback = callback or function() end
@@ -350,9 +353,12 @@ function Lib:CreateWindow(name)
             button = ToggleButton,
             location = location,
             flag = flag,
-            callback = callback
+            callback = callback,
+            name = name
         }
         table.insert(Window.ToggleButtons, toggleInfo)
+        
+        Window.ToggleElements[flag] = ToggleButton
 
         Text.MouseButton1Click:Connect(function()
             if ToggleButton.Text == "On" then
@@ -392,6 +398,36 @@ function Lib:CreateWindow(name)
             end
         end
         return false
+    end
+    
+    function Window:UpdateToggleExternal(flag, state)
+        local toggleElement = Window.ToggleElements[flag]
+        if toggleElement then
+            if state then
+                toggleElement.Text = "On"
+                toggleElement.TextColor3 = Color3.fromRGB(0, 255, 0)
+                toggleElement.TextStrokeColor3 = Color3.fromRGB(0, 255, 0)
+            else
+                toggleElement.Text = "Off"
+                toggleElement.TextColor3 = Color3.fromRGB(255, 0, 0)
+                toggleElement.TextStrokeColor3 = Color3.fromRGB(255, 0, 0)
+            end
+            for _, toggle in pairs(Window.ToggleButtons) do
+                if toggle.flag == flag then
+                    toggle.location[toggle.flag] = state
+                    break
+                end
+            end
+        end
+    end
+    
+    function Window:GetToggleState(flag)
+        for _, toggle in pairs(Window.ToggleButtons) do
+            if toggle.flag == flag then
+                return toggle.location[toggle.flag]
+            end
+        end
+        return nil
     end
 
     function Window:Slider(name, options, callback)
